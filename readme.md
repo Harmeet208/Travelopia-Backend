@@ -40,4 +40,4 @@ After installing the packages, run the above command to create the required tabl
 
 After tables have been created, to launch the project run the above command
 
-### By default project runs on localhost:3000 
+### By default project runs on http://127.0.0.1:8000/
