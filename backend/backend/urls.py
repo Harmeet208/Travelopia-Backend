@@ -21,5 +21,5 @@ from travelopia.views import MyView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('my-url/', MyView.as_view(), name='my-view'),
+    path('booking/', MyView.as_view(), name='my-view'),
 ]

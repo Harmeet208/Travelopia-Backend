@@ -1,5 +1,5 @@
 from django.views import View
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .models import Person
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -7,16 +7,24 @@ import json
 
 class MyView(View):
     def get(self, request):
-        print(f"request {request}")
-        response = HttpResponse('Hello, world!', status=200)
-        response['Content-Type'] = 'text/plain'
+        db_res = Person.objects.all().order_by('-id')
+        data = []
+        for person in db_res:
+            data.append({
+                'name': person.name,
+                'email': person.email,
+                'currency': person.currency,
+                'travellers': person.travellers,
+                'country': person.country
+            })
+        print(f"data {data}")
+        response = JsonResponse({'data': data}, status=200)
         return response
 
     @csrf_exempt
     def post(self, request):
-        # Do some processing here
         data = json.loads(request.body)
-        response = HttpResponse('Success', status=200)
+        response = JsonResponse({'message':'Success', 'code':200}, status=200)
         response['Content-Type'] = 'text/plain'
         if not data.get('name'):
             response = HttpResponse('Please Provide Name', status=400)
@@ -43,7 +51,7 @@ class MyView(View):
             response['Content-Type'] = 'text/plain'
             return response
         
-        person = Person(data)
+        person = Person.objects.create(**data)
         person.save()
 
         return response
