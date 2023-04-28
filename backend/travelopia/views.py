@@ -24,34 +24,34 @@ class MyView(View):
     @csrf_exempt
     def post(self, request):
         data = json.loads(request.body)
-        response = JsonResponse({'message':'Success', 'code':200}, status=200)
+        response = JsonResponse({'message':'Data Submitted Successfully', 'code': 200}, status=200)
         response['Content-Type'] = 'text/plain'
         if not data.get('name'):
-            response = HttpResponse('Please Provide Name', status=400)
-            response['Content-Type'] = 'text/plain'
+            response = JsonResponse({'message':'Please Provide Name', 'code': 400}, status=400)
             return response
 
         if not data.get('email'):
-            response = HttpResponse('Please Provide Email', status=400)
-            response['Content-Type'] = 'text/plain'
+            response = JsonResponse({'message':'Please Provide Email', 'code': 400}, status=400)
             return response
+
 
         if not data.get('country'):
-            response = HttpResponse('Please Provide Country', status=400)
-            response['Content-Type'] = 'text/plain'
+            response = JsonResponse({'message':'Please Provide Country', 'code': 400}, status=400)
             return response
 
+
         if not data.get('currency'):
-            response = HttpResponse('Please Provide Budget', status=400)
-            response['Content-Type'] = 'text/plain'
+            response = JsonResponse({'message':'Please Provide Budget', 'code': 400}, status=400)
             return response
 
         if not data.get('travellers'):
-            response = HttpResponse('Please Provide Travellers', status=400)
-            response['Content-Type'] = 'text/plain'
+            response = JsonResponse({'message':'Please Provide No of Trvellers', 'code': 400}, status=400)
             return response
-        
-        person = Person.objects.create(**data)
-        person.save()
+        try:
+            person = Person.objects.create(**data)
+            person.save()
+        except Exception as e:
+            response = JsonResponse({'message':'Internal Server Error', 'code': 500}, status=500)
+            return response
 
         return response
