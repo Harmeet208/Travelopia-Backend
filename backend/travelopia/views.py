@@ -34,7 +34,6 @@ class MyView(View):
             response = JsonResponse({'message':'Please Provide Email', 'code': 400}, status=400)
             return response
 
-
         if not data.get('country'):
             response = JsonResponse({'message':'Please Provide Country', 'code': 400}, status=400)
             return response
@@ -45,8 +44,14 @@ class MyView(View):
             return response
 
         if not data.get('travellers'):
-            response = JsonResponse({'message':'Please Provide No of Trvellers', 'code': 400}, status=400)
+            response = JsonResponse({'message':'Please Provide No of Travelers', 'code': 400}, status=400)
             return response
+        
+        entry = Person.objects.filter(email=data.get('email'))
+        if entry.exists():
+            response = JsonResponse({'message':'Email Already Exists', 'code': 409}, status=200)
+            return response
+
         try:
             person = Person.objects.create(**data)
             person.save()
