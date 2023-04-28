@@ -10,9 +10,11 @@ For python - 3.11.3
 For pip - 23.1
 For PostgreSQL - 15.2 
 
+### Please make sure that your postgresql is connected locally
+
 ## Changes to make
 
-1. Navigate to `backend` Directory
+1. Navigate to `backend/backend` Directory
 2. Now inside settings.py file change the database credentials to create tables locally, which looks like - 
     Line Number - 79 -> DATABASES = {
         'default': {

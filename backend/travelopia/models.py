@@ -2,9 +2,9 @@
 
 from django.db import models
 
-class Person(models.Model):
+class TravellerDetails(models.Model):
     name = models.CharField(max_length=255)
-    country = models.CharField(max_length=255)
+    destination_country = models.CharField(max_length=255)
     email = models.EmailField()
-    currency = models.IntegerField()
-    travellers = models.IntegerField()
+    budget_per_person = models.IntegerField()
+    number_of_traveller = models.IntegerField()

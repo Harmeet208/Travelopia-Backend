@@ -1,62 +1,37 @@
-from django.views import View
-from django.http import HttpResponse, JsonResponse
-from .models import Person
-from django.views.decorators.csrf import csrf_exempt
 import json
-
+from django.views import View
+from django.http import JsonResponse
+from travelopia.models import TravellerDetails
+from travelopia.exceptions import *
+from travelopia.validations import validate_create_traveller_data
 
 class MyView(View):
     def get(self, request):
-        db_res = Person.objects.all().order_by('-id')
-        data = []
-        for person in db_res:
-            data.append({
-                'name': person.name,
-                'email': person.email,
-                'currency': person.currency,
-                'travellers': person.travellers,
-                'country': person.country
+        traveller_details = TravellerDetails.objects.all().order_by('-id')
+        traveller_details_list = []
+        for traveller_detail in traveller_details:
+            traveller_details_list.append({
+                'name': traveller_detail.name,
+                'email': traveller_detail.email,
+                'budget_per_person': traveller_detail.budget_per_person,
+                'number_of_traveller': traveller_detail.number_of_traveller,
+                'destination_country': traveller_detail.destination_country
             })
-        print(f"data {data}")
-        response = JsonResponse({'data': data}, status=200)
+        print(f"traveller_details_list: {traveller_details_list}")
+        response = JsonResponse({'data': traveller_details_list}, status=200)
         return response
 
-    @csrf_exempt
     def post(self, request):
-        data = json.loads(request.body)
-        response = JsonResponse({'message':'Data Submitted Successfully', 'code': 200}, status=200)
-        response['Content-Type'] = 'text/plain'
-        if not data.get('name'):
-            response = JsonResponse({'message':'Please Provide Name', 'code': 400}, status=400)
-            return response
-
-        if not data.get('email'):
-            response = JsonResponse({'message':'Please Provide Email', 'code': 400}, status=400)
-            return response
-
-        if not data.get('country'):
-            response = JsonResponse({'message':'Please Provide Country', 'code': 400}, status=400)
-            return response
-
-
-        if not data.get('currency'):
-            response = JsonResponse({'message':'Please Provide Budget', 'code': 400}, status=400)
-            return response
-
-        if not data.get('travellers'):
-            response = JsonResponse({'message':'Please Provide No of Travelers', 'code': 400}, status=400)
-            return response
-        
-        entry = Person.objects.filter(email=data.get('email'))
-        if entry.exists():
-            response = JsonResponse({'message':'Email Already Exists', 'code': 409}, status=200)
-            return response
-
+        request_data = json.loads(request.body)
         try:
-            person = Person.objects.create(**data)
-            person.save()
+            validate_create_traveller_data(request_data)
+            traveller_obj = TravellerDetails.objects.create(**request_data)
+            traveller_obj.save()
+        except (InvalidNumberOfTravellerException, InvalidBudgetPerPersonException, 
+                InvalidDestinationCountryException, InvalidNameException, InvalidEmailException) as e:
+            return JsonResponse({'message': str(e.args[0]), 'code': 400}, status=400)
         except Exception as e:
-            response = JsonResponse({'message':'Internal Server Error', 'code': 500}, status=500)
-            return response
+            print(f"Exception occurred: {str(e)}")
+            return JsonResponse({'message':'Internal Server Error', 'code': 500}, status=500)
 
-        return response
+        return JsonResponse({'message':'Data Submitted Successfully', 'code': 200}, status=200)
